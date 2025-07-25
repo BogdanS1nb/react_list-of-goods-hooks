@@ -29,62 +29,47 @@ function getSortedGoods(
 
   if (sortField) {
     sortedGoods.sort((goods1, goods2) => {
-      let comparison = 0;
-
       switch (sortField) {
         case SortField.alphabet:
-          comparison = goods1.localeCompare(goods2);
-          break;
+          return goods1.localeCompare(goods2);
         case SortField.length:
-          comparison = goods1.length - goods2.length;
-          break;
-        default:
-          comparison = 0;
+          return goods1.length - goods2.length;
       }
-
-      return reverse ? -comparison : comparison;
     });
+  }
+
+  if (reverse) {
+    sortedGoods.reverse();
   }
 
   return sortedGoods;
 }
 
-function getReverseGoods(listOfGoods: string[]): string[] {
-  return [...listOfGoods].reverse();
-}
-
 export const App: React.FC = () => {
-  const initialGoods = [...goodsFromServer];
-  const [goods, setGoods] = useState(initialGoods);
   const [sortField, setSortField] = useState<SortField | ''>('');
   const [isReverse, setReverse] = useState(false);
-  //handlers
-  const getSortAlphabetically = () => {
-    const sortedGoods = getSortedGoods(goods, SortField.alphabet, isReverse);
-
-    setGoods(sortedGoods);
+  const handleSortAlphabetically = () => {
     setSortField(SortField.alphabet);
   };
 
-  const getSortByLength = () => {
-    const sortedGoods = getSortedGoods(goods, SortField.length, isReverse);
-
-    setGoods(sortedGoods);
+  const handleSortByLength = () => {
     setSortField(SortField.length);
   };
 
-  const setReverseGoods = () => {
-    const reversedGoods = getReverseGoods(goods);
-
-    setGoods(() => reversedGoods);
-    setReverse(!isReverse);
+  const handleReverse = () => {
+    setReverse(prev => !prev);
   };
 
-  const getReset = () => {
-    setGoods(initialGoods);
+  const handleReset = () => {
     setSortField('');
     setReverse(false);
   };
+
+  const visibleGoods = sortField
+    ? getSortedGoods(goodsFromServer, sortField, isReverse)
+    : isReverse
+      ? [...goodsFromServer].reverse()
+      : goodsFromServer;
 
   return (
     <div className="section content">
@@ -92,32 +77,36 @@ export const App: React.FC = () => {
         <button
           type="button"
           className={`button is-info ${sortField === SortField.alphabet ? '' : 'is-light'}`}
-          onClick={getSortAlphabetically}
+          onClick={handleSortAlphabetically}
         >
           Sort alphabetically
         </button>
         <button
           type="button"
           className={`button is-success ${sortField === SortField.length ? '' : 'is-light'}`}
-          onClick={getSortByLength}
+          onClick={handleSortByLength}
         >
           Sort by length
         </button>
         <button
           type="button"
           className={`button is-warning ${isReverse === true ? '' : 'is-light'}`}
-          onClick={setReverseGoods}
+          onClick={handleReverse}
         >
           Reverse
         </button>
         {(sortField || isReverse) && (
-          <button type="button" className="button is-danger" onClick={getReset}>
+          <button
+            type="button"
+            className="button is-danger"
+            onClick={handleReset}
+          >
             Reset
           </button>
         )}
       </div>
       <ul>
-        {goods.map(good => (
+        {visibleGoods.map(good => (
           <li key={good} data-cy="Good">
             {good}
           </li>
