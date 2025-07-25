@@ -48,6 +48,7 @@ function getSortedGoods(
 export const App: React.FC = () => {
   const [sortField, setSortField] = useState<SortField | ''>('');
   const [isReverse, setReverse] = useState(false);
+
   const handleSortAlphabetically = () => {
     setSortField(SortField.alphabet);
   };
